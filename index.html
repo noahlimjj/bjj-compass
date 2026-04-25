@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#e63946" />
+    <meta name="description" content="BJJ Compass - Track your Jiu-Jitsu training sessions, techniques, and streaks" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="/icon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="/icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="96x96" href="/icon-96x96.png" />
+    <link rel="apple-touch-icon" sizes="128x128" href="/icon-128x128.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="/icon-144x144.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="384x384" href="/icon-384x384.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/icon-512x512.png" />
+
+    <!-- iOS Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="BJJ Compass" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <title>BJJ Compass</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+
+    <!-- Register Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('Service Worker registered:', registration);
+            })
+            .catch((error) => {
+              console.log('Service Worker registration failed:', error);
+            });
+        });
+      }
+    </script>
+
+    <!-- PWA Install Prompt -->
+    <script>
+      let deferredPrompt;
+      let installButton;
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        showInstallButton();
+      });
+
+      function showInstallButton() {
+        if (!installButton) {
+          installButton = document.createElement('button');
+          installButton.id = 'installButton';
+          installButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Install App</span>
+          `;
+          installButton.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #e63946 0%, #c1121f 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.4);
+            transition: all 0.3s ease;
+          `;
+
+          installButton.addEventListener('mouseenter', () => {
+            installButton.style.transform = 'translateY(-2px)';
+            installButton.style.boxShadow = '0 6px 20px rgba(230, 57, 70, 0.5)';
+          });
+
+          installButton.addEventListener('mouseleave', () => {
+            installButton.style.transform = 'translateY(0)';
+            installButton.style.boxShadow = '0 4px 12px rgba(230, 57, 70, 0.4)';
+          });
+
+          installButton.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log('Install prompt: ' + outcome);
+
+            deferredPrompt = null;
+            hideInstallButton();
+          });
+
+          document.body.appendChild(installButton);
+        }
+      }
+
+      function hideInstallButton() {
+        if (installButton && installButton.parentNode) {
+          installButton.parentNode.removeChild(installButton);
+          installButton = null;
+        }
+      }
+
+      window.addEventListener('appinstalled', () => {
+        console.log('PWA installed');
+        hideInstallButton();
+      });
+    </script>
+  </body>
+</html>
