@@ -855,14 +855,140 @@ body {
   border-radius: 3px;
 }
 
+/* Breathe View */
+.breathe-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 1rem;
+}
+
+.breathe-view .breathing-section {
+  padding: 1.5rem 0;
+}
+
+.breathe-view .breathing-circle {
+  width: 220px;
+  height: 220px;
+  cursor: pointer;
+}
+
+.breathing-circle.active {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 30px rgba(230, 57, 70, 0.3), inset 0 0 30px rgba(230, 57, 70, 0.1); }
+  50% { box-shadow: 0 0 50px rgba(230, 57, 70, 0.5), inset 0 0 40px rgba(230, 57, 70, 0.2); }
+}
+
+.breathing-sublabel {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-top: 0.25rem;
+}
+
+.breath-toggle-btn {
+  padding: 1rem 3rem;
+  border: none;
+  border-radius: 50px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 2rem;
+}
+
+.breath-toggle-btn.start {
+  background: linear-gradient(135deg, var(--accent-red), #c1121f);
+  color: white;
+  box-shadow: 0 4px 20px rgba(230, 57, 70, 0.4);
+}
+
+.breath-toggle-btn.start:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(230, 57, 70, 0.5);
+}
+
+.breath-toggle-btn.stop {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 2px solid var(--accent-red);
+  box-shadow: none;
+}
+
+.breath-toggle-btn.stop:hover {
+  background: rgba(230, 57, 70, 0.1);
+}
+
+.breath-info {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  width: 100%;
+  max-width: 360px;
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+}
+
+.breath-info-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.breath-info-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.breath-info-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  color: var(--accent-green);
+}
+
 /* Responsive */
-@media (max-width: 380px) {
+@media (max-width: 480px) {
+  .app-container {
+    padding: 0.5rem 1rem 5rem 1rem;
+  }
+  
+  .app-header {
+    padding: 1rem 0 1rem;
+  }
+  
   .app-header h1 {
     font-size: 2.5rem;
   }
   
+  .breathe-view .breathing-circle {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .breath-info {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  
+  .stat-value {
+    font-size: 2rem;
   }
   
   .technique-grid {
