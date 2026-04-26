@@ -1,3 +1,7 @@
+# ⚠️  REQUIRED SETUP: Add these secrets in GitHub repo → Settings → Secrets → Actions:
+#   NETLIFY_AUTH_TOKEN = nfc_56NvJ7erHbqr8vk1Evpf8mmqJbZndBLs23ac
+#   NETLIFY_SITE_ID    = bb4a62c0-f3d8-4560-9773-3d9e9d81dfd0
+
 name: Deploy to Netlify
 
 on:
