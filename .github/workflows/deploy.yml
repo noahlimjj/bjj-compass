@@ -61,7 +61,7 @@ jobs:
           NODE_ENV: production
 
       - name: Deploy to Netlify
-        run: npx netlify deploy --dir=dist --prod --message "Deploy from GitHub Actions: ${{ github.sha }}"
+        run: npx netlify deploy --dir=dist --prod --message 'Deploy from GitHub Actions: ${{ github.sha }}'
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
