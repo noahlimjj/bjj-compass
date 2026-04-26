@@ -17,8 +17,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: npm
           cache-dependency-path: package-lock.json
 
       - name: Install dependencies
@@ -48,8 +48,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: npm
           cache-dependency-path: package-lock.json
 
       - name: Install dependencies
@@ -61,7 +61,7 @@ jobs:
           NODE_ENV: production
 
       - name: Deploy to Netlify
-        run: npx netlify deploy --dir=dist --prod --message 'Deploy from GitHub Actions: ${{ github.sha }}'
+        run: npx netlify deploy --dir=dist --prod --message "Deploy ${{ github.sha }}"
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
