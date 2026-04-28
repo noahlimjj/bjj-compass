@@ -21,13 +21,6 @@ const MOTIVATIONAL_QUOTES = [
   { text: "Tap early, tap often. Come back tomorrow.", author: "Every BJJ Player Ever" },
 ]
 
-const CHECKLIST_ITEMS = [
-  { id: 'hydrated', label: 'Hydrated', hint: 'Drank water in the last 30 min' },
-  { id: 'breaths', label: 'Deep Breaths Done', hint: 'At least 3 deep breaths' },
-  { id: 'technique', label: "Reviewed Today's Technique", hint: 'Looked at notes or thought about it' },
-  { id: 'bodyscan', label: 'Body Scan', hint: 'No sharp pain, good to train' },
-]
-
 function getToday() {
   return new Date().toISOString().split('T')[0]
 }
@@ -40,11 +33,17 @@ function App() {
   const [breathPhase, setBreathPhase] = useState('inhale')
   const [breathScale, setBreathScale] = useState(1)
   const [breathActive, setBreathActive] = useState(false)
+  const breathRef = useRef(null)
+
   const [checklist, setChecklist] = useState(() => {
     const saved = localStorage.getItem('bjj-compass-checklist')
-    return saved ? JSON.parse(saved) : { hydrated: false, breaths: false, technique: false, bodyscan: false }
+    return saved ? JSON.parse(saved) : { hydrated: false, breathing: false, technique: false, bodyScan: false }
   })
-  const breathRef = useRef(null)
+
+  const [milestones, setMilestones] = useState(() => {
+    const saved = localStorage.getItem('bjj-compass-streak-milestones')
+    return saved ? JSON.parse(saved) : { 7: false, 30: false, 100: false }
+  })
 
   const [formData, setFormData] = useState({
     date: getToday(),
@@ -66,15 +65,16 @@ function App() {
     localStorage.setItem('bjj-compass-sessions', JSON.stringify(sessions))
   }, [sessions])
 
-  // Save checklist to localStorage
+  // Save checklist to localStorage and reset when leaving tab
   useEffect(() => {
     localStorage.setItem('bjj-compass-checklist', JSON.stringify(checklist))
   }, [checklist])
 
-  // Reset checklist when leaving tab
   useEffect(() => {
     if (view !== 'checklist') {
-      setChecklist({ hydrated: false, breaths: false, technique: false, bodyscan: false })
+      const defaultState = { hydrated: false, breathing: false, technique: false, bodyScan: false }
+      setChecklist(defaultState)
+      localStorage.setItem('bjj-compass-checklist', JSON.stringify(defaultState))
     }
   }, [view])
 
@@ -164,6 +164,18 @@ function App() {
 
   const streak = calculateStreak()
 
+  useEffect(() => {
+    let changed = false;
+    const newMilestones = { ...milestones };
+    if (streak >= 7 && !newMilestones[7]) { newMilestones[7] = true; changed = true; }
+    if (streak >= 30 && !newMilestones[30]) { newMilestones[30] = true; changed = true; }
+    if (streak >= 100 && !newMilestones[100]) { newMilestones[100] = true; changed = true; }
+    if (changed) {
+      setMilestones(newMilestones);
+      localStorage.setItem('bjj-compass-streak-milestones', JSON.stringify(newMilestones));
+    }
+  }, [streak, milestones])
+
   const getFavorites = () => {
     const counts = {}
     sessions.forEach(s => {
@@ -214,8 +226,6 @@ function App() {
     }
   }
 
-  const checklistDone = Object.values(checklist).every(Boolean)
-
   return (
     <div className="app-container">
       <header className="app-header">
@@ -249,6 +259,33 @@ function App() {
             <div className="stat-card">
               <div className="stat-value">{avgIntensity}</div>
               <div className="stat-label"><span className="stat-icon">💪</span>Avg Intensity</div>
+            </div>
+          </div>
+
+          <div className="section milestones-section">
+            <h3 className="section-title"><span className="section-icon">🏆</span>Milestones</h3>
+            <div className="milestones-row">
+              <div className={`milestone-badge ${milestones[7] ? 'achieved' : 'locked'}`}>
+                <div className="milestone-icon">🔥</div>
+                <div className="milestone-info">
+                  <div className="milestone-name">Week Warrior</div>
+                  <div className="milestone-req">7 Days</div>
+                </div>
+              </div>
+              <div className={`milestone-badge ${milestones[30] ? 'achieved' : 'locked'}`}>
+                <div className="milestone-icon">💪</div>
+                <div className="milestone-info">
+                  <div className="milestone-name">Month Master</div>
+                  <div className="milestone-req">30 Days</div>
+                </div>
+              </div>
+              <div className={`milestone-badge ${milestones[100] ? 'achieved' : 'locked'}`}>
+                <div className="milestone-icon">👑</div>
+                <div className="milestone-info">
+                  <div className="milestone-name">Century Champion</div>
+                  <div className="milestone-req">100 Days</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -328,43 +365,45 @@ function App() {
       {/* ─── CHECKLIST ─── */}
       {view === 'checklist' && (
         <div className="checklist-view">
-          <div className="checklist-header">
-            <h2 className="checklist-title">Pre-Roll Checklist</h2>
-            <p className="checklist-subtitle">Get your head right before you step on the mat</p>
-          </div>
-
+          <h2 className="section-header">Pre-Roll Checklist</h2>
+          
           <div className="checklist-items">
-            {CHECKLIST_ITEMS.map(item => (
-              <div
-                key={item.id}
-                className={`checklist-item ${checklist[item.id] ? 'checked' : ''}`}
-                onClick={() => setChecklist(prev => ({ ...prev, [item.id]: !prev[item.id] }))}
-              >
-                <div className="checklist-checkbox">
-                  {checklist[item.id] && <span className="checklist-checkmark">✓</span>}
-                </div>
-                <div className="checklist-text">
-                  <span className="checklist-label">{item.label}</span>
-                  <span className="checklist-hint">{item.hint}</span>
-                </div>
+            <label className={`checklist-item ${checklist.hydrated ? 'checked' : ''}`}>
+              <input type="checkbox" checked={checklist.hydrated} onChange={e => setChecklist(prev => ({...prev, hydrated: e.target.checked}))} />
+              <div className="checklist-text">
+                <span className="checklist-title">Hydrated</span>
+                <span className="checklist-desc">Drank water in last 30 min</span>
               </div>
-            ))}
+            </label>
+            <label className={`checklist-item ${checklist.breathing ? 'checked' : ''}`}>
+              <input type="checkbox" checked={checklist.breathing} onChange={e => setChecklist(prev => ({...prev, breathing: e.target.checked}))} />
+              <div className="checklist-text">
+                <span className="checklist-title">Deep breaths done</span>
+                <span className="checklist-desc">At least 3 deep breaths</span>
+              </div>
+            </label>
+            <label className={`checklist-item ${checklist.technique ? 'checked' : ''}`}>
+              <input type="checkbox" checked={checklist.technique} onChange={e => setChecklist(prev => ({...prev, technique: e.target.checked}))} />
+              <div className="checklist-text">
+                <span className="checklist-title">Reviewed today's technique</span>
+                <span className="checklist-desc">Looked at notes or thought about it</span>
+              </div>
+            </label>
+            <label className={`checklist-item ${checklist.bodyScan ? 'checked' : ''}`}>
+              <input type="checkbox" checked={checklist.bodyScan} onChange={e => setChecklist(prev => ({...prev, bodyScan: e.target.checked}))} />
+              <div className="checklist-text">
+                <span className="checklist-title">Body scan</span>
+                <span className="checklist-desc">No sharp pain, good to train</span>
+              </div>
+            </label>
           </div>
 
-          {checklistDone && (
-            <div className="checklist-complete">
-              <span className="checklist-complete-icon">🏆</span>
-              <p className="checklist-complete-text">You are ready to dominate.</p>
-              <p className="checklist-complete-sub">Trust your technique.</p>
+          {checklist.hydrated && checklist.breathing && checklist.technique && checklist.bodyScan && (
+            <div className="ready-message">
+              <div className="ready-icon">🔥</div>
+              <p>You are ready to dominate. Trust your technique.</p>
             </div>
           )}
-
-          <button
-            className="checklist-reset-btn"
-            onClick={() => setChecklist({ hydrated: false, breaths: false, technique: false, bodyscan: false })}
-          >
-            Reset Checklist
-          </button>
         </div>
       )}
 
