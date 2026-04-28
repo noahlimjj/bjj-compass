@@ -21,6 +21,13 @@ const MOTIVATIONAL_QUOTES = [
   { text: "Tap early, tap often. Come back tomorrow.", author: "Every BJJ Player Ever" },
 ]
 
+const CHECKLIST_ITEMS = [
+  { id: 'hydrated', label: 'Hydrated', hint: 'Drank water in the last 30 min' },
+  { id: 'breaths', label: 'Deep Breaths Done', hint: 'At least 3 deep breaths' },
+  { id: 'technique', label: "Reviewed Today's Technique", hint: 'Looked at notes or thought about it' },
+  { id: 'bodyscan', label: 'Body Scan', hint: 'No sharp pain, good to train' },
+]
+
 function getToday() {
   return new Date().toISOString().split('T')[0]
 }
@@ -33,6 +40,10 @@ function App() {
   const [breathPhase, setBreathPhase] = useState('inhale')
   const [breathScale, setBreathScale] = useState(1)
   const [breathActive, setBreathActive] = useState(false)
+  const [checklist, setChecklist] = useState(() => {
+    const saved = localStorage.getItem('bjj-compass-checklist')
+    return saved ? JSON.parse(saved) : { hydrated: false, breaths: false, technique: false, bodyscan: false }
+  })
   const breathRef = useRef(null)
 
   const [formData, setFormData] = useState({
@@ -54,6 +65,18 @@ function App() {
   useEffect(() => {
     localStorage.setItem('bjj-compass-sessions', JSON.stringify(sessions))
   }, [sessions])
+
+  // Save checklist to localStorage
+  useEffect(() => {
+    localStorage.setItem('bjj-compass-checklist', JSON.stringify(checklist))
+  }, [checklist])
+
+  // Reset checklist when leaving tab
+  useEffect(() => {
+    if (view !== 'checklist') {
+      setChecklist({ hydrated: false, breaths: false, technique: false, bodyscan: false })
+    }
+  }, [view])
 
   // Breathing animation
   useEffect(() => {
@@ -191,6 +214,8 @@ function App() {
     }
   }
 
+  const checklistDone = Object.values(checklist).every(Boolean)
+
   return (
     <div className="app-container">
       <header className="app-header">
@@ -201,6 +226,7 @@ function App() {
       <nav className="nav-tabs">
         <button className={`nav-tab ${view === 'dashboard' ? 'active' : ''}`} onClick={() => setView('dashboard')}>Dashboard</button>
         <button className={`nav-tab ${view === 'breathe' ? 'active' : ''}`} onClick={() => setView('breathe')}>Breathe</button>
+        <button className={`nav-tab ${view === 'checklist' ? 'active' : ''}`} onClick={() => setView('checklist')}>Checklist</button>
         <button className={`nav-tab ${view === 'history' ? 'active' : ''}`} onClick={() => setView('history')}>History</button>
       </nav>
 
@@ -296,6 +322,49 @@ function App() {
               <span className="breath-info-value">2s</span>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ─── CHECKLIST ─── */}
+      {view === 'checklist' && (
+        <div className="checklist-view">
+          <div className="checklist-header">
+            <h2 className="checklist-title">Pre-Roll Checklist</h2>
+            <p className="checklist-subtitle">Get your head right before you step on the mat</p>
+          </div>
+
+          <div className="checklist-items">
+            {CHECKLIST_ITEMS.map(item => (
+              <div
+                key={item.id}
+                className={`checklist-item ${checklist[item.id] ? 'checked' : ''}`}
+                onClick={() => setChecklist(prev => ({ ...prev, [item.id]: !prev[item.id] }))}
+              >
+                <div className="checklist-checkbox">
+                  {checklist[item.id] && <span className="checklist-checkmark">✓</span>}
+                </div>
+                <div className="checklist-text">
+                  <span className="checklist-label">{item.label}</span>
+                  <span className="checklist-hint">{item.hint}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {checklistDone && (
+            <div className="checklist-complete">
+              <span className="checklist-complete-icon">🏆</span>
+              <p className="checklist-complete-text">You are ready to dominate.</p>
+              <p className="checklist-complete-sub">Trust your technique.</p>
+            </div>
+          )}
+
+          <button
+            className="checklist-reset-btn"
+            onClick={() => setChecklist({ hydrated: false, breaths: false, technique: false, bodyscan: false })}
+          >
+            Reset Checklist
+          </button>
         </div>
       )}
 
